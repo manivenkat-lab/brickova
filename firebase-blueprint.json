@@ -1,0 +1,128 @@
+{
+  "entities": {
+    "AppUser": {
+      "title": "AppUser",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "photo": { "type": "string" },
+        "role": { "type": "string", "enum": ["buyer", "agent", "agency"] },
+        "agencyId": { "type": "string" },
+        "agencyCode": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "plan": { "type": "string", "enum": ["free", "basic", "pro", "agency"] },
+        "listingsUsed": { "type": "integer" },
+        "isSubscribed": { "type": "boolean" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Property": {
+      "title": "Property",
+      "description": "Real estate property listing",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "location": { "type": "string" },
+        "city": { "type": "string" },
+        "category": { "type": "string", "enum": ["PLOT", "DEVELOPED"] },
+        "propertyType": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "agencyId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "locationSource": { "type": "string", "enum": ["gps", "manual"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      },
+      "required": ["title", "price", "createdBy"]
+    },
+    "Agency": {
+      "title": "Agency",
+      "description": "Real estate agency",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "adminUid": { "type": "string" },
+        "code": { "type": "string" },
+        "slotLimit": { "type": "integer" },
+        "slotUsed": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["name", "adminUid", "code"]
+    },
+    "AgencyMember": {
+      "title": "AgencyMember",
+      "description": "Member of an agency",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "agent"] },
+        "joinedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "role"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Potential customer lead",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "status": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "agencyId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "assignedTo"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "User activity log",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "action": { "type": "string" },
+        "leadId": { "type": "string" },
+        "leadName": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "AppUser",
+      "description": "User profiles"
+    },
+    "/properties/{propertyId}": {
+      "schema": "Property",
+      "description": "Property listings"
+    },
+    "/agencies/{agencyId}": {
+      "schema": "Agency",
+      "description": "Agencies"
+    },
+    "/agencies/{agencyId}/members/{memberId}": {
+      "schema": "AgencyMember",
+      "description": "Agency members"
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Leads"
+    },
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Activity logs"
+    }
+  }
+}

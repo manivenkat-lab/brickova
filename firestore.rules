@@ -1,0 +1,193 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - displayName: string (required)
+    //   - email: string (required)
+    //   - role: string (required, ['buyer', 'agent', 'agency'])
+    //   - agencyId: string (optional)
+    //   - plan: string (required, ['free', 'basic', 'pro', 'agency'])
+    //
+    // Collection: properties
+    // Document ID: propertyId
+    // Fields:
+    //   - title: string (required)
+    //   - price: number (required)
+    //   - createdBy: string (required, uid)
+    //   - agencyId: string (optional)
+    //
+    // Collection: agencies
+    // Document ID: agencyId
+    // Fields:
+    //   - name: string (required)
+    //   - adminUid: string (required)
+    //   - code: string (required)
+    //
+    // Collection: leads
+    // Document ID: leadId
+    // Fields:
+    //   - name: string (required)
+    //   - assignedTo: string (required, uid)
+    //   - agencyId: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "manivenkat0666@gmail.com" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "manivenkat825@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidString(field, min, max) {
+      return request.resource.data[field] is string && 
+             request.resource.data[field].size() >= min && 
+             request.resource.data[field].size() <= max;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'displayName', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.role in ['buyer', 'agent', 'agency', 'admin'];
+    }
+
+    function isValidProperty(data) {
+      return hasRequiredFields(['title', 'price', 'createdBy']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.price is number && data.price >= 0 &&
+             data.createdBy == request.auth.uid;
+    }
+
+    function isValidAgency(data) {
+      return hasRequiredFields(['name', 'adminUid', 'code']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.code is string && data.code.size() > 0 && data.code.size() < 50 &&
+             data.adminUid == request.auth.uid;
+    }
+
+    function isValidAgencyUpdate(data) {
+      return (data.name is string && data.name.size() > 0 && data.name.size() < 100 || !('name' in data)) &&
+             (data.code is string && data.code.size() > 0 && data.code.size() < 50 || !('code' in data));
+    }
+
+    function isValidLead(data) {
+      return hasRequiredFields(['name', 'assignedTo', 'agencyId']) &&
+             data.name is string && data.name.size() > 0;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    (isOwner(userId) && request.resource.data.role != 'admin' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && 
+                    (isOwner(userId) && request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    // Properties: Publicly readable, but only owners/admins can modify
+    match /properties/{propertyId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidProperty(request.resource.data);
+      allow update: if isAuthenticated() && (
+        (resource.data.createdBy == request.auth.uid && isValidProperty(request.resource.data)) || 
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isAdmin());
+    }
+
+    // Connection test path
+    match /test/connection {
+      allow read: if true;
+    }
+
+    match /connection_tests/{testId} {
+      allow create: if true;
+    }
+
+    match /agencies/{agencyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidAgency(request.resource.data);
+      allow update: if isAuthenticated() && isValidAgencyUpdate(request.resource.data) && (resource.data.adminUid == request.auth.uid || isAdmin());
+      
+      match /members/{memberId} {
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/agencies/$(agencyId)).data.adminUid == request.auth.uid ||
+          memberId == request.auth.uid ||
+          isAdmin()
+        );
+        allow write: if isAuthenticated() && (
+          get(/databases/$(database)/documents/agencies/$(agencyId)).data.adminUid == request.auth.uid ||
+          isAdmin()
+        );
+      }
+    }
+
+    match /leads/{leadId} {
+      allow read: if isAuthenticated() && (
+        resource.data.assignedTo == request.auth.uid || 
+        get(/databases/$(database)/documents/agencies/$(resource.data.agencyId)).data.adminUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && isValidLead(request.resource.data);
+      allow update: if isAuthenticated() && isValidLead(request.resource.data) && (
+        resource.data.assignedTo == request.auth.uid || 
+        get(/databases/$(database)/documents/agencies/$(resource.data.agencyId)).data.adminUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        get(/databases/$(database)/documents/agencies/$(resource.data.agencyId)).data.adminUid == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
+    match /activities/{activityId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Brickova CRM</title>
+    <meta name="title" content="Brickova – Real Estate CRM" />
+    <meta name="description" content="Brickova CRM helps real estate agents manage leads, properties, and clients efficiently." />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        scroll-padding-top: 64px;
+      }
+      body { 
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+        overflow-x: hidden;
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e9e6df; border-radius: 10px; }
+      
+      /* Global Range Slider Styling - Optimized for Mobile Thumbs */
+      input[type=range] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #e9e6df;
+        height: 8px;
+        border-radius: 9999px;
+        outline: none;
+      }
+
+      input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        background: #0f172a;
+        cursor: pointer;
+        border: 4px solid #ffffff;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+        transition: all 0.2s ease;
+      }
+
+      @media (max-width: 640px) {
+        input[type=range]::-webkit-slider-thumb {
+          height: 28px;
+          width: 28px;
+        }
+      }
+
+      /* Touch-friendly transitions */
+      .active-scale-98:active {
+        transform: scale(0.98);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script type="module" src="/main.tsx"></script>
+</body>
+</html>
