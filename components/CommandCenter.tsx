@@ -1,10 +1,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { X, LogOut, PieChart, Users, Layers, Briefcase, LineChart, Globe, Menu, ShieldCheck, UserPlus, Plus, QrCode, Eye, Trash2, PackageOpen, Loader2, Crown } from 'lucide-react';
+import { X, LogOut, PieChart, Users, Layers, Briefcase, LineChart, Globe, Menu, ShieldCheck, UserPlus, Plus, QrCode, Eye, Trash2, PackageOpen, Loader2, Crown, Building2 } from 'lucide-react';
 import { Property, Agent, Agency, Lead, UserRole, LeadStatus, PropertyType, PropertyCategory, MembershipTier, Activity, AppUser } from '../types';
 import PropertyForm from './PropertyForm';
 import { getAgencyMembers } from '../services/agencyService';
 import LeadDashboard from './crm/LeadDashboard';
+import InventoryManager from './inventory/InventoryManager';
 import LeadPipeline from './crm/LeadPipeline';
 import LeadForm from './crm/LeadForm';
 import LeadDetails from './crm/LeadDetails';
@@ -26,8 +27,8 @@ interface CommandCenterProps {
   onLogout: () => void;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
-  activeTab: 'dashboard' | 'listings' | 'leads' | 'team' | 'analytics';
-  setActiveTab: (tab: 'dashboard' | 'listings' | 'leads' | 'team' | 'analytics') => void;
+  activeTab: 'dashboard' | 'listings' | 'leads' | 'team' | 'analytics' | 'inventory';
+  setActiveTab: (tab: 'dashboard' | 'listings' | 'leads' | 'team' | 'analytics' | 'inventory') => void;
   user?: AppUser;
   onUpgrade?: () => void;
 }
@@ -329,6 +330,12 @@ const CommandCenter: React.FC<CommandCenterProps> = ({
           >
             <Layers className={`w-4 h-4 ${activeTab === 'listings' ? 'text-gold' : ''}`} /> {isAdmin ? 'Property Listings' : 'My Listings'}
           </button>
+          <button 
+            onClick={() => { setActiveTab('inventory'); setIsSidebarOpen(false); }} 
+            className={`whitespace-nowrap flex items-center gap-3 px-5 py-3 rounded-xl text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'inventory' ? 'bg-white text-navy shadow-premium' : 'text-white/40 hover:text-white/70 hover:bg-white/5'}`}
+          >
+            <Building2 className={`w-4 h-4 ${activeTab === 'inventory' ? 'text-gold' : ''}`} /> Live Inventory
+          </button>
           {isAdmin && (
             <>
               <button 
@@ -365,7 +372,7 @@ const CommandCenter: React.FC<CommandCenterProps> = ({
              </button>
              <div className="space-y-1.5 md:space-y-2">
                <h2 className="text-2xl md:text-5xl font-display font-bold text-navy uppercase tracking-tight">
-                 {activeTab === 'dashboard' ? 'Brickova Dashboard' : activeTab === 'leads' ? 'Lead Pipeline' : activeTab === 'listings' ? 'Listings' : activeTab === 'analytics' ? 'Analytics' : 'Agency Team'}
+                 {activeTab === 'dashboard' ? 'Brickova Dashboard' : activeTab === 'leads' ? 'Lead Pipeline' : activeTab === 'listings' ? 'Listings' : activeTab === 'analytics' ? 'Analytics' : activeTab === 'inventory' ? 'Live Inventory' : 'Agency Team'}
                </h2>
                <p className="text-[8px] md:text-[10px] font-bold text-navy-muted uppercase tracking-wider flex items-center gap-2">
                  <ShieldCheck className="w-3.5 h-3.5 text-gold" /> {agency?.name || 'Independent Partner'}
@@ -522,6 +529,11 @@ const CommandCenter: React.FC<CommandCenterProps> = ({
                  </div>
               </div>
            </div>
+        )}
+        {activeTab === 'inventory' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <InventoryManager agentProfile={agentProfile} agency={agency} />
+          </div>
         )}
       </main>
 

@@ -14,17 +14,19 @@ import Pricing from './components/Pricing';
 import PaymentStatus from './components/PaymentStatus';
 import Logo from './components/Logo';
 import UserMenuDrawer from './components/UserMenuDrawer';
+import LiveInventory from './components/LiveInventory';
 import { getProperties, subscribeToProperties } from './services/propertyService';
 import { subscribeToAuthChanges, getCurrentUserDoc, logout as firebaseLogout, updatePlan, updateListingsUsed } from './services/authService';
 import { runConnectionTest } from './services/testService';
-import { getAgencyByAdmin, joinAgencyByCode } from './services/agencyService';
 import { createLead } from './services/leadService';
 import { logActivity } from './services/activityService';
 import { doc, getDoc, query, collection, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
-import { Building2, Home, Map, Store, ShieldCheck, Handshake, Lock, BarChart3, Building, UserRound, MapPin, Smile, ArrowRight, ChevronDown, Menu, Bookmark, Loader2, Search, FolderOpen, Globe, Check } from 'lucide-react';
+import { getAgencyByAdmin, joinAgencyByCode } from './services/agencyService';
 
-type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING';
+import { Building2, Home, Map, Store, ShieldCheck, Handshake, Lock, BarChart3, Building, UserRound, MapPin, Smile, ArrowRight, ChevronDown, Menu, Bookmark, Loader2, Search, FolderOpen, Globe, Check, Layers } from 'lucide-react';
+
+type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING' | 'INVENTORY';
 
 const ModernBuildingSilhouette = () => (
   <div className="absolute right-0 bottom-0 w-full md:w-1/2 h-full z-0 pointer-events-none opacity-[0.05] overflow-hidden">
@@ -543,7 +545,7 @@ const App: React.FC = () => {
   const [currentAgency, setCurrentAgency] = useState<Agency | null>(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'listings' | 'leads' | 'team' | 'analytics'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'listings' | 'leads' | 'team' | 'analytics' | 'inventory'>('dashboard');
   const [paymentResult, setPaymentResult] = useState<{ status: 'SUCCESS' | 'FAILURE', plan?: MembershipTier } | null>(null);
 
   useEffect(() => {
@@ -919,6 +921,9 @@ const App: React.FC = () => {
                 { label: 'Contact', onClick: () => {} }
               ]} 
             />
+            <button onClick={() => setView('INVENTORY')} className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${view === 'INVENTORY' ? 'text-navy' : 'text-navy-muted hover:text-navy'}`}>
+              <Layers className="w-3.5 h-3.5" /> Inventory
+            </button>
             <button onClick={() => setView('SHORTLIST')} className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${view === 'SHORTLIST' ? 'text-navy' : 'text-navy-muted hover:text-navy'}`}>Vault {shortlistedIds.length > 0 && <span className="bg-gold text-white min-w-[1rem] h-[1rem] rounded-full flex items-center justify-center text-[7px] font-bold px-1">{shortlistedIds.length}</span>}</button>
           </div>
 
@@ -958,9 +963,10 @@ const App: React.FC = () => {
       </nav>
 
       <div className="md:hidden flex items-center justify-around bg-white/80 backdrop-blur-md border-b border-beige-200 px-2 py-3 sticky top-14 z-[90] shadow-sm">
-         <button onClick={() => setView('MARKET')} className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Explore</button>
-         <button onClick={() => setView('SELLERS')} className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'SELLERS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Sell</button>
-         <button onClick={() => setView('AGENTS')} className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'AGENTS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Agents</button>
+         <button onClick={() => setView('MARKET')} className={`text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Explore</button>
+         <button onClick={() => setView('INVENTORY')} className={`text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition-all flex items-center gap-1 ${view === 'INVENTORY' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}><Layers className="w-3 h-3" />Inventory</button>
+         <button onClick={() => setView('SELLERS')} className={`text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'SELLERS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Sell</button>
+         <button onClick={() => setView('AGENTS')} className={`text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'AGENTS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Agents</button>
       </div>
 
       <UserMenuDrawer 
@@ -1327,6 +1333,9 @@ const App: React.FC = () => {
         )}
         {view === 'PRICING' && (
           <Pricing onSelectPlan={handleSelectPlan} currentPlan={user?.plan} />
+        )}
+        {view === 'INVENTORY' && (
+          <LiveInventory currentUser={user} />
         )}
       </>
     )}

@@ -269,3 +269,52 @@ export interface SearchFilters {
   maxPrice: number;
   propertyType?: string | 'ALL';
 }
+
+// ─── Live Project Inventory ───────────────────────────────────────────────────
+
+export type UnitStatus = 'Available' | 'Sold' | 'Reserved' | 'Blocked' | 'Coming Soon';
+
+export interface Builder {
+  id: string;
+  name: string;
+  logo?: string;
+  description?: string;
+  totalVentures?: number;
+  createdAt?: any;
+}
+
+export interface Venture {
+  id: string;
+  builderId: string;
+  name: string;
+  location: string;
+  description?: string;
+  image?: string;
+  totalTowers?: number;
+  createdAt?: any;
+}
+
+export interface Tower {
+  id: string;
+  ventureId: string;
+  builderId: string;
+  name: string;
+  totalFloors?: number;
+  createdAt?: any;
+}
+
+export interface InventoryUnit {
+  id: string;
+  towerId: string;
+  ventureId: string;
+  builderId: string;
+  flatNumber: string;
+  floorNumber: number;
+  bhk: string;
+  sqft: number;
+  facing: string;
+  price: number;
+  status: UnitStatus;
+  createdAt?: any;
+  updatedAt?: any;
+}
