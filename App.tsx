@@ -912,7 +912,6 @@ const App: React.FC = () => {
         </div>
       </footer>
       )}
-      <AIAssistant properties={properties} />
     </div>
   );
 };
