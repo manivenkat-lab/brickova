@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Property, PropertyType, PropertyCategory } from '../types';
 import PropertyForm from './PropertyForm';
-import { getMyProperties } from '../services/propertyService';
 import { auth } from '../firebase';
 
 interface OwnerDashboardProps {

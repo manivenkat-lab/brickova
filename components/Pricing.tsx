@@ -6,7 +6,7 @@ const Pricing: React.FC = () => {
   const plans = [
     {
       name: 'Basic Agent',
-      price: '₹499',
+      price: '₹999',
       period: '/ month',
       description: 'Best for new agents getting started.',
       features: [
@@ -20,7 +20,7 @@ const Pricing: React.FC = () => {
     },
     {
       name: 'Pro Agent',
-      price: '₹999',
+      price: '₹1999',
       period: '/ month',
       description: 'Most popular plan for active real estate agents.',
       features: [
@@ -59,6 +59,11 @@ const Pricing: React.FC = () => {
         <p className="text-navy-muted font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px] max-w-2xl mx-auto">
           Choose the professional tier that aligns with your asset management goals.
         </p>
+        <div className="flex justify-center pt-2 md:pt-4">
+          <div className="bg-gold/10 border border-gold/30 text-gold px-6 md:px-8 py-2 md:py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-soft animate-pulse">
+            <i className="fa-solid fa-gift mr-2"></i> Starts with a 1-Month Free Trial
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

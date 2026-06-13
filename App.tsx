@@ -4,13 +4,18 @@ import { Property, PropertyType, PropertyCategory, BHKType, SearchFilters, Membe
 import { MOCK_PROPERTIES, INDIAN_CITIES, MOCK_AGENTS, MOCK_BLOGS, CURRENCY_SYMBOLS } from './constants';
 import PropertyCard from './components/PropertyCard';
 import PropertyDetails from './components/PropertyDetails';
-import CommandCenter from './components/CommandCenter';
-import OwnerDashboard from './components/OwnerDashboard';
+import CustomerDashboard from './components/CustomerDashboard';
+import AgentDashboard from './components/AgentDashboard';
+import AgencyDashboard from './components/AgencyDashboard';
 import SellerLoginView from './components/SellerLoginView';
 import AIAssistant from './components/AIAssistant';
 import AgentRegistrationView from './components/AgentRegistrationView';
 import Pricing from './components/Pricing';
+import AboutPage from './components/AboutPage';
+import ContactPage from './components/ContactPage';
 import Logo from './components/Logo';
+import LandingPage from './components/LandingPage';
+import DemoPage from './components/DemoPage';
 import { getProperties, subscribeToProperties } from './services/propertyService';
 import { subscribeToAuthChanges, getCurrentUserDoc, logout as firebaseLogout } from './services/authService';
 import { runConnectionTest } from './services/testService';
@@ -20,7 +25,7 @@ import { logActivity } from './services/activityService';
 import { doc, getDoc, query, collection, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 
-type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING';
+type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING' | 'ABOUT' | 'CONTACT' | 'DEMO';
 
 const ModernBuildingSilhouette = () => (
   <div className="absolute right-0 bottom-0 w-full md:w-1/2 h-full z-0 pointer-events-none opacity-[0.05] overflow-hidden">
@@ -578,7 +583,11 @@ const App: React.FC = () => {
         (filters.propertyType === 'Flat' && p.propertyType === 'Apartment') ||
         (filters.propertyType === 'Commercial' && p.plotType === 'Commercial') ||
         (filters.propertyType === 'Commercial' && p.category === PropertyCategory.PLOT);
-      return matchQuery && matchCat && matchBhk && matchType && matchPropType;
+      
+      const price = p.price || 0;
+      const matchPrice = price >= filters.minPrice && price <= filters.maxPrice;
+
+      return matchQuery && matchCat && matchBhk && matchType && matchPropType && matchPrice;
     });
   }, [displayProperties, filters, view, shortlistedIds]);
 
@@ -635,6 +644,10 @@ const App: React.FC = () => {
     setAgentUser(agent);
   };
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [view]);
+
   return (
     <div className="min-h-screen bg-beige-50 text-navy font-sans selection:bg-gold selection:text-white flex flex-col relative">
       <ArchitecturalBackground />
@@ -647,54 +660,20 @@ const App: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-1">
-            <NavDropdown 
-              label="Buy & Rent" 
-              items={[
-                { label: 'Apartments', onClick: () => { setView('MARKET'); setFilters({...filters, propertyType: 'Apartment'}); } },
-                { label: 'Villas', onClick: () => { setView('MARKET'); setFilters({...filters, propertyType: 'Villa'}); } },
-                { label: 'Plots', onClick: () => { setView('MARKET'); setFilters({...filters, propertyType: 'Plot'}); } },
-                { label: 'Commercial', onClick: () => { setView('MARKET'); setFilters({...filters, propertyType: 'Commercial'}); } }
-              ]} 
-            />
-            <NavDropdown 
-              label="Sell Property" 
-              items={[
-                { label: 'List Property', onClick: () => setView('SELLERS') },
-                { label: 'Agent Dashboard', onClick: () => setView('SELLERS') }
-              ]} 
-            />
-            <NavDropdown 
-              label="Partner Hub" 
-              items={[
-                { label: 'Join as Agent', onClick: () => setView('AGENTS') },
-                { label: 'Join as Agency', onClick: () => setView('AGENTS') },
-                { label: 'Pricing Plans', onClick: () => setView('PRICING') }
-              ]} 
-            />
-            <NavDropdown 
-              label="About" 
-              items={[
-                { label: 'About Brickova', onClick: () => {} },
-                { label: 'Contact', onClick: () => {} }
-              ]} 
-            />
-            <button onClick={() => setView('SHORTLIST')} className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${view === 'SHORTLIST' ? 'text-navy' : 'text-navy-muted hover:text-navy'}`}>Vault {shortlistedIds.length > 0 && <span className="bg-gold text-white min-w-[1rem] h-[1rem] rounded-full flex items-center justify-center text-[7px] font-black px-1">{shortlistedIds.length}</span>}</button>
+            <button onClick={() => { setView('MARKET'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Home</button>
+            <button onClick={() => setView('ABOUT')} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">About</button>
+            <button onClick={() => setView('CONTACT')} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Contact</button>
+            
+            <button onClick={() => { setView('DEMO'); window.scrollTo(0,0); }} className="px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white bg-navy hover:bg-gold rounded-full transition-all ml-4 shadow-soft">Book Demo</button>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <select className="hidden sm:block bg-white text-[8px] font-black uppercase px-3 py-1.5 rounded-full border border-beige-200 outline-none text-navy shadow-soft cursor-pointer hover:border-gold/30 transition-all" value={currency} onChange={(e) => setCurrency(e.target.value as any)}>
-              <option value="INR">INR (₹)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option>
-            </select>
             {(user || agentUser) && (
               <div className="w-8 h-8 rounded-full border-2 border-gold p-0.5 shadow-soft shrink-0">
                  <img src={user?.photo || agentUser?.photo} alt="Avatar" className="w-full h-full object-cover rounded-full" />
               </div>
             )}
             <div className="md:hidden flex items-center gap-2">
-               <button onClick={() => setView('SHORTLIST')} className="w-9 h-9 flex items-center justify-center text-navy relative active:scale-90 transition-transform">
-                  <i className="fa-regular fa-bookmark text-lg"></i>
-                  {shortlistedIds.length > 0 && <span className="absolute top-1 right-1 bg-gold text-white w-4 h-4 rounded-full text-[7px] flex items-center justify-center font-black shadow-soft">{shortlistedIds.length}</span>}
-               </button>
                <button onClick={() => setIsMobileMenuOpen(true)} className="w-9 h-9 flex items-center justify-center text-navy active:scale-90 transition-transform">
                   <i className="fa-solid fa-bars text-xl"></i>
                </button>
@@ -704,9 +683,8 @@ const App: React.FC = () => {
       </nav>
 
       <div className="md:hidden flex items-center justify-around bg-white/80 backdrop-blur-md border-b border-beige-200 px-2 py-3 sticky top-14 z-[90] shadow-sm">
-         <button onClick={() => setView('MARKET')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Explore</button>
-         <button onClick={() => setView('SELLERS')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'SELLERS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Sell</button>
-         <button onClick={() => setView('AGENTS')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'AGENTS' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Agents</button>
+         <button onClick={() => { setView('MARKET'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Home</button>
+         <button onClick={() => { setView('DEMO'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'DEMO' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Book Demo</button>
       </div>
 
       <div className={`fixed inset-0 bg-navy/50 backdrop-blur-sm z-[200] transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsMobileMenuOpen(false)}>
@@ -719,34 +697,17 @@ const App: React.FC = () => {
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Buy & Rent</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Explore</h3>
               <div className="flex flex-col gap-2">
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); setFilters({...filters, propertyType: 'Apartment'}); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Apartments</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); setFilters({...filters, propertyType: 'Villa'}); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Villas</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); setFilters({...filters, propertyType: 'Plot'}); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Plots</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); setFilters({...filters, propertyType: 'Commercial'}); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Commercial</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Home</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('DEMO'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Book Demo</button>
               </div>
             </div>
             <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Sell Property</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Company</h3>
               <div className="flex flex-col gap-2">
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('SELLERS'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">List Property</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('SELLERS'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Agent Dashboard</button>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Partner Hub</h3>
-              <div className="flex flex-col gap-2">
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('AGENTS'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Join as Agent</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('AGENTS'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Join as Agency</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('PRICING'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Pricing Plans</button>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">About</h3>
-              <div className="flex flex-col gap-2">
-                <button onClick={() => setIsMobileMenuOpen(false)} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">About Brickova</button>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Contact</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('ABOUT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">About</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('CONTACT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Contact</button>
               </div>
             </div>
           </div>
@@ -758,142 +719,23 @@ const App: React.FC = () => {
           <div className="flex-1 flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-4">
               <i className="fa-solid fa-circle-notch animate-spin text-4xl text-gold"></i>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-navy-muted">Synchronizing Asset Data...</p>
             </div>
           </div>
         ) : (
           <>
-            {(view === 'MARKET' || view === 'SHORTLIST') && (
+            {view === 'MARKET' && (
           <div className="duration-700">
-            <header className="relative min-h-[30vh] md:min-h-[30vh] lg:h-[40vh] flex flex-col items-center justify-center text-center px-4 md:px-8 overflow-hidden bg-gradient-to-b from-white via-beige-50 to-beige-100/40 border-b border-beige-100 py-10 md:py-16">
-              <BuildingSkyline />
-              <ArchitecturalDrafting />
-              <ThreeDLightLines />
-              <ModernBuildingSilhouette />
-              <div className="absolute inset-0 z-0 hero-texture pointer-events-none"></div>
-              <div className="relative z-10 w-full max-w-5xl mx-auto space-y-6 md:space-y-8">
-                <div className="space-y-3 md:space-y-4 px-2">
-                  {view === 'SHORTLIST' ? (
-                    <>
-                      <h1 className="text-xl sm:text-3xl md:text-5xl font-black tracking-[0.1em] md:tracking-[0.18em] text-navy uppercase leading-tight font-montserrat px-4">
-                        YOUR PRIVATE SELECTION
-                      </h1>
-                      <p className="max-w-xl mx-auto text-navy-muted font-bold text-[8px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.3em] opacity-80 leading-relaxed px-6">
-                        Curated assets in your personal vault.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-navy/5 border border-navy/10 text-navy font-black uppercase tracking-widest text-[8px] md:text-[10px] mx-auto">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
-                        Institutional Grade Real Estate
-                      </div>
-                      <h1 className="text-4xl md:text-6xl lg:text-7xl font-[900] text-navy tracking-tighter leading-[0.9] font-montserrat">
-                        THE FUTURE OF <br className="hidden md:block" />
-                        <span className="text-slate-700">ASSET EXCHANGE</span>
-                      </h1>
-                      <p className="mt-6 md:mt-10 text-[10px] md:text-xs text-slate-600 font-semibold max-w-2xl mx-auto leading-relaxed uppercase tracking-widest">
-                        Buy and sell properties directly with owners. <br className="hidden md:block" />
-                        No middlemen. Verified property listings.
-                      </p>
-                    </>
-                  )}
-                </div>
-                
-                {view === 'MARKET' && (
-                  <>
-                    <div className="max-w-4xl mx-auto bg-white rounded-2xl p-1 shadow-premium border border-beige-200/80 hover:border-gold/40 transition-all duration-500 flex flex-col md:flex-row items-stretch gap-1 md:gap-0 mx-2">
-                      <div className="flex-[2] flex items-center px-4 md:px-6 py-3 md:py-4 border-b md:border-b-0 md:border-r border-beige-100 group">
-                        <i className="fa-solid fa-magnifying-glass text-navy-muted/30 mr-3 text-[10px] md:text-[12px]"></i>
-                        <input type="text" placeholder="Search city, area or project..." className="bg-transparent w-full text-[10px] md:text-xs font-bold text-navy outline-none placeholder:text-navy-muted/40 uppercase tracking-widest" value={filters.query} onChange={(e) => setFilters({...filters, query: e.target.value})} />
-                      </div>
-                      
-                      <div className="flex-1 flex items-center px-4 md:px-6 py-3 md:py-4 border-b md:border-b-0 md:border-r border-beige-100">
-                        <select className="bg-transparent w-full text-[9px] md:text-[9px] font-black uppercase tracking-widest text-navy outline-none cursor-pointer appearance-none" value={filters.category} onChange={(e) => setFilters({...filters, category: e.target.value as any})}>
-                          <option value="ALL">All Categories</option>
-                          <option value={PropertyCategory.PLOT}>Plots / Land</option>
-                          <option value={PropertyCategory.DEVELOPED}>Flats / Villas</option>
-                        </select>
-                      </div>
+            <LandingPage onDemoClick={() => { setView('DEMO'); window.scrollTo(0,0); }} />
 
-                      <div className="flex-1 flex items-center px-4 md:px-6 py-3 md:py-4">
-                        <select className="bg-transparent w-full text-[9px] md:text-[9px] font-black uppercase tracking-widest text-navy outline-none cursor-pointer appearance-none" value={filters.bhk} onChange={(e) => setFilters({...filters, bhk: e.target.value as any})}>
-                          <option value="ALL">BHK Config</option>
-                          <option value={BHKType.BHK1}>1 BHK</option>
-                          <option value={BHKType.BHK2}>2 BHK</option>
-                          <option value={BHKType.BHK3}>3 BHK</option>
-                          <option value={BHKType.BHK4}>4+ BHK</option>
-                        </select>
-                      </div>
-
-                      <button className="btn-glass text-white px-8 md:px-10 py-3.5 md:py-4 font-black text-[10px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.25em] hover:shadow-elevated rounded-xl active:scale-95 m-1">Search</button>
-                    </div>
-                    <CategoryShortcuts 
-                      activeCategory={filters.propertyType}
-                      onSelect={(cat) => {
-                        setFilters(prev => ({
-                          ...prev, 
-                          propertyType: prev.propertyType === cat ? 'ALL' : cat
-                        }));
-                        const el = document.getElementById('inventory-section');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }} 
-                    />
-                  </>
-                )}
-              </div>
-            </header>
-
-            {view === 'MARKET' && (
-              <section className="py-16 md:py-24 bg-beige-50/30">
-                <div className="max-w-7xl mx-auto px-4 md:px-8">
-                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 md:mb-12">
-                    <div className="space-y-2">
-                      <h2 className="text-2xl md:text-4xl font-black text-navy uppercase tracking-tighter">Featured Properties</h2>
-                      <p className="text-[10px] md:text-xs font-black text-navy-muted uppercase tracking-[0.3em] opacity-60">Handpicked Premium Assets for Discerning Investors</p>
-                    </div>
-                    <button onClick={() => {
-                      const el = document.getElementById('inventory-section');
-                      el?.scrollIntoView({ behavior: 'smooth' });
-                    }} className="text-[10px] font-black uppercase tracking-widest text-gold hover:underline">View All Properties</button>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {displayProperties.slice(0, 3).map(p => (
-                      <PropertyCard 
-                        key={p.id}
-                        property={p} 
-                        isShortlisted={shortlistedIds.includes(p.id)} 
-                        onToggleShortlist={() => toggleShortlist(p.id)} 
-                        onSelect={(p) => { setSelectedProperty(p); setView('DETAILS'); }} 
-                        formatPrice={(price) => formatPriceShorthand(price, p.type)} 
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {view === 'MARKET' && (
-              <>
-                <CityExploration onCitySelect={(city) => {
-                  setFilters(prev => ({ ...prev, query: city }));
-                  const el = document.getElementById('inventory-section');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                }} />
-                <StatsStrip />
-                <TrustSection />
-              </>
-            )}
-
-            {(view === 'SHORTLIST' || filters.query || filters.category !== 'ALL' || filters.bhk !== 'ALL' || filters.propertyType) && (
+            {(filters.query || filters.category !== 'ALL' || filters.bhk !== 'ALL' || filters.propertyType) && (
               <div id="inventory-section" className="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                   <div className="space-y-2">
                     <h2 className="text-2xl md:text-4xl font-black text-navy uppercase tracking-tighter">
-                      {view === 'SHORTLIST' ? 'YOUR PRIVATE SELECTION' : 'Available Inventory'}
+                      Available Inventory
                     </h2>
                     <p className="text-[10px] md:text-xs font-black text-navy-muted uppercase tracking-[0.3em] opacity-60">
-                      {view === 'SHORTLIST' ? 'Curated assets in your personal vault' : 'Direct Listings from Verified Owners'}
+                      Direct Listings from Verified Owners
                     </p>
                   </div>
                 </div>
@@ -936,8 +778,33 @@ const App: React.FC = () => {
             {!user ? (
               <SellerLoginView onLoginSuccess={setUser} />
             ) : (
-              <OwnerDashboard properties={properties} onAddProperty={handleAddProperty} onUpdateProperty={handleUpdateProperty} onDeleteProperty={handleDeleteProperty} onUpdateAvailability={() => {}} role="OWNER" onLogout={handleSellerLogout} />
+               <CustomerDashboard 
+                 properties={properties}
+                 shortlistedIds={shortlistedIds}
+                 onToggleShortlist={toggleShortlist}
+                 onAddProperty={handleAddProperty}
+                 onUpdateProperty={handleUpdateProperty}
+                 onDeleteProperty={handleDeleteProperty}
+                 onViewProperty={(p) => { setSelectedProperty(p); setView('DETAILS'); }}
+                 onLogout={handleSellerLogout}
+                 initialView="LISTINGS"
+               />
             )}
+          </div>
+        )}
+        {view === 'SHORTLIST' && (
+          <div className="max-w-7xl mx-auto w-full px-4 md:px-8">
+               <CustomerDashboard 
+                 properties={properties}
+                 shortlistedIds={shortlistedIds}
+                 onToggleShortlist={toggleShortlist}
+                 onAddProperty={handleAddProperty}
+                 onUpdateProperty={handleUpdateProperty}
+                 onDeleteProperty={handleDeleteProperty}
+                 onViewProperty={(p) => { setSelectedProperty(p); setView('DETAILS'); }}
+                 onLogout={handleSellerLogout}
+                 initialView="VAULT"
+               />
           </div>
         )}
         {view === 'AGENTS' && (
@@ -946,40 +813,53 @@ const App: React.FC = () => {
               <SellerLoginView onLoginSuccess={setUser} />
             ) : !agentUser ? (
               <AgentRegistrationView currentUser={user} onRegistrationSuccess={handleAgentRegistration} existingAgencies={agencies} />
+            ) : agentUser.role === UserRole.AGENCY_ADMIN ? (
+              <AgencyDashboard 
+                 properties={properties} 
+                 onEdit={(p) => { setSelectedProperty(p); setView('DETAILS'); }} 
+                 onDelete={handleDeleteProperty} 
+                 onAddProperty={handleAddProperty} 
+                 onBackToMarket={() => setView('MARKET')} 
+                 agentProfile={agentUser} 
+                 agency={(currentAgency || { id: '', name: 'Empty Agency', adminUid: '', code: '', slotLimit: 15, slotUsed: 0, active: true, createdAt: new Date() }) as Agency}
+                 allAgents={agents} 
+                 onLogout={handleAgentLogout} 
+                 isSidebarOpen={isSidebarOpen}
+                 setIsSidebarOpen={setIsSidebarOpen}
+               />
             ) : (
-              <CommandCenter 
-                properties={properties} 
-                onEdit={(p) => { setSelectedProperty(p); setView('DETAILS'); }} 
-                onDelete={handleDeleteProperty} 
-                onAddProperty={handleAddProperty} 
-                onBackToMarket={() => setView('MARKET')} 
-                agentProfile={agentUser} 
-                agency={currentAgency || undefined}
-                allAgents={agents} 
-                allLeads={[]} 
-                onUpdateLead={() => {}} 
-                onLogout={handleAgentLogout} 
-                isSidebarOpen={isSidebarOpen}
-                setIsSidebarOpen={setIsSidebarOpen}
-              />
+              <AgentDashboard 
+                 properties={properties} 
+                 onEdit={(p) => { setSelectedProperty(p); setView('DETAILS'); }} 
+                 onDelete={handleDeleteProperty} 
+                 onAddProperty={handleAddProperty} 
+                 onBackToMarket={() => setView('MARKET')} 
+                 agentProfile={agentUser} 
+                 allAgents={agents} 
+                 onLogout={handleAgentLogout} 
+                 isSidebarOpen={isSidebarOpen}
+                 setIsSidebarOpen={setIsSidebarOpen}
+               />
             )}
           </div>
         )}
         {view === 'PRICING' && (
           <Pricing />
         )}
+        {view === 'ABOUT' && <AboutPage />}
+        {view === 'CONTACT' && <ContactPage />}
+        {view === 'DEMO' && <DemoPage />}
       </>
     )}
       </main>
       
-      <footer className="bg-navy py-20 text-white">
+      {!loading && (
+      <footer className="bg-navy py-12 md:py-20 text-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
-            <div className="col-span-2 md:col-span-1 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-12 md:mb-20">
+            <div className="col-span-1 sm:col-span-2 md:col-span-1 space-y-4 md:space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-navy shadow-soft">
-                  <i className="fa-solid fa-hotel text-sm"></i>
-                </div>
+                <Logo className="w-10 h-10 shadow-soft" />
                 <span className="text-xl font-black uppercase tracking-widest font-montserrat">Brickova</span>
               </div>
               <p className="text-xs text-white/40 font-medium leading-relaxed uppercase tracking-wider">
@@ -1018,18 +898,20 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
+          <div className="pt-8 md:pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] text-center md:text-left">
               © 2026 Brickova. All rights reserved.
             </p>
             <div className="flex gap-8">
-              <i className="fa-brands fa-linkedin text-white/20 hover:text-gold transition-colors cursor-pointer text-lg"></i>
               <i className="fa-brands fa-twitter text-white/20 hover:text-gold transition-colors cursor-pointer text-lg"></i>
-              <i className="fa-brands fa-instagram text-white/20 hover:text-gold transition-colors cursor-pointer text-lg"></i>
+              <a href="https://www.instagram.com/brickova_?igsh=dzNneGJwejZqNjN2&utm_source=qr" target="_blank" rel="noopener noreferrer">
+                <i className="fa-brands fa-instagram text-white/20 hover:text-gold transition-colors cursor-pointer text-lg"></i>
+              </a>
             </div>
           </div>
         </div>
       </footer>
+      )}
       <AIAssistant properties={properties} />
     </div>
   );

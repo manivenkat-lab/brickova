@@ -169,3 +169,19 @@ export const addLeadNote = async (leadId: string, noteText: string): Promise<voi
     throw error;
   }
 };
+
+export const createDemoRequest = async (demoData: any): Promise<string> => {
+  if (!db) throw new Error("Firestore not initialized");
+  try {
+    const docRef = await addDoc(collection(db, "demoRequests"), {
+      ...demoData,
+      status: "NEW",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating demo request:", error);
+    throw error;
+  }
+};

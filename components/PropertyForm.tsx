@@ -310,7 +310,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ onSuccess, onCancel, initia
         alert("Property updated successfully");
         onSuccess({ ...p, id: initialData.id });
       } else {
-        const id = await createProperty(p, agentProfile?.id || initialData?.ownerId || 'current-user', agentProfile?.agencyId || initialData?.agencyId || null);
+        const id = await createProperty(p);
         setIsSubmitting(false);
         alert("Property listed successfully");
         onSuccess({ ...p, id });
@@ -626,14 +626,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ onSuccess, onCancel, initia
                   <div className="p-5 md:p-6 bg-white border border-beige-200 rounded-xl md:rounded-[2rem] shadow-soft space-y-4 md:space-y-6">
                     <div className="flex items-center gap-2 md:gap-3 border-b border-beige-100 pb-2 md:pb-3">
                        <i className="fa-solid fa-file-contract text-gold text-lg md:text-xl"></i>
-                       <h5 className="text-[9px] md:text-[11px] font-black text-navy uppercase tracking-[0.2em]">Title Documents</h5>
+                       <h5 className="text-[9px] md:text-[11px] font-black text-navy uppercase tracking-[0.2em]">Address Proof (Aadhaar)</h5>
                     </div>
                     <div className="space-y-2 md:space-y-3">
                       <div className="relative group">
                          <input type="file" accept="application/pdf" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleDocUpload} />
                          <div className={`w-full border-2 border-dashed rounded-xl md:rounded-2xl px-4 py-6 md:px-5 md:py-8 text-center transition-all duration-300 ${verificationDocUrl ? 'border-success bg-success/5' : 'border-beige-300 bg-beige-50'}`}>
                             <i className={`fa-solid ${verificationDocUrl ? 'fa-file-circle-check text-success' : 'fa-file-shield text-navy-muted'} text-2xl md:text-3xl mb-2 md:mb-3`}></i>
-                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-navy">{verificationDocUrl ? 'Document Attached' : 'Upload Sale Deed / RERA PDF'}</p>
+                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-navy">{verificationDocUrl ? 'Aadhaar Attached' : 'Upload Aadhaar Card (PDF/Image)'}</p>
                          </div>
                       </div>
                     </div>
