@@ -145,11 +145,24 @@ export default function ServicesPage({ onDemoClick }: ServicesPageProps) {
                        />
                        
                        {/* Interactive SVG Zones Overlay mapped on top of image */}
-                       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full drop-shadow-xl z-20">
+                       <svg 
+                         viewBox="0 0 100 100" 
+                         preserveAspectRatio="none" 
+                         className="absolute inset-0 w-full h-full drop-shadow-xl z-20"
+                         onClick={() => setHoveredRoom(null)}
+                       >
                          {(data.roomsData[activeView] || []).map((room) => (
                            <g key={room.id}
                               onMouseEnter={() => setHoveredRoom(room.id)}
                               onMouseLeave={() => setHoveredRoom(null)}
+                              onTouchStart={(e) => {
+                                e.stopPropagation();
+                                setHoveredRoom(prev => prev === room.id ? null : room.id);
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setHoveredRoom(prev => prev === room.id ? null : room.id);
+                              }}
                               className="cursor-pointer transition-all duration-300"
                            >
                              <path 
@@ -267,17 +280,17 @@ export default function ServicesPage({ onDemoClick }: ServicesPageProps) {
                 )}
                 
                 {/* On-canvas view controllers - Elegant Top HUD */}
-                <div className="absolute top-4 left-4 right-4 flex flex-wrap justify-between items-center gap-3 z-20">
-                   <div className="bg-navy/80 backdrop-blur-md px-3 py-2 rounded-lg border border-navy/20 text-gold font-mono text-[9px] tracking-widest uppercase shadow-lg select-none">
+                <div className="absolute top-4 left-4 right-4 flex flex-row justify-between items-center gap-3 z-30">
+                   <div className="hidden sm:block bg-navy/80 backdrop-blur-md px-3 py-2 rounded-lg border border-navy/20 text-gold font-mono text-[9px] tracking-widest uppercase shadow-lg select-none">
                       Render: <span className="text-white">{activeView} VIEW</span>
                    </div>
                    
-                   <div className="bg-white/90 backdrop-blur-md px-2 py-1.5 rounded-xl border border-beige-200 shadow-premium flex gap-1">
+                   <div className="bg-white/95 backdrop-blur-md px-1.5 py-1.5 rounded-xl border border-beige-200 shadow-premium flex gap-1 w-full sm:w-auto justify-around sm:justify-start">
                      {(['ISO', 'FRONT', 'TOP', 'SIDE', 'BACK'] as const).map(v => (
                        <button
                          key={v}
                          onClick={() => setActiveView(v)}
-                         className={`px-3 py-1 text-[8px] font-black tracking-widest rounded-lg transition-all active:scale-95 ${activeView === v ? 'bg-navy text-gold shadow-md scale-105' : 'text-navy-muted hover:text-navy hover:bg-beige-50'}`}
+                         className={`px-2.5 py-2 sm:px-3 sm:py-1 text-[8px] font-black tracking-widest rounded-lg transition-all active:scale-95 ${activeView === v ? 'bg-navy text-gold shadow-md scale-105' : 'text-navy-muted hover:text-navy hover:bg-beige-50'}`}
                        >
                          {v}
                        </button>
@@ -296,7 +309,7 @@ export default function ServicesPage({ onDemoClick }: ServicesPageProps) {
               <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-navy-muted">Transform raw shells into luxury interiors instantly</p>
             </div>
             
-            <div className="relative aspect-square md:aspect-[4/3] max-w-3xl mx-auto w-full rounded-2xl overflow-hidden cursor-ew-resize select-none border border-beige-200"
+            <div className="relative aspect-square md:aspect-[4/3] max-w-3xl mx-auto w-full rounded-2xl overflow-hidden cursor-ew-resize select-none border border-beige-200 touch-none"
               onMouseMove={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));

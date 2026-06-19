@@ -215,7 +215,7 @@ AI Action: Automatically triggering tailored WhatsApp interactive brochure to co
                           key={unit.id}
                           disabled={unit.status === 'SOLD'}
                           onClick={() => setSelectedUnitId(unit.id)}
-                          className={`p-4 border rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer select-none font-montserrat ${bgClass} ${selectedUnitId === unit.id ? 'ring-2 ring-navy ring-offset-2 scale-105' : ''}`}
+                          className={`p-2.5 sm:p-4 border rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer select-none font-montserrat ${bgClass} ${selectedUnitId === unit.id ? 'ring-2 ring-navy ring-offset-2 scale-105' : ''}`}
                         >
                           <span className="text-xs md:text-sm font-black tracking-tight">{unit.id}</span>
                           <span className="text-[8px] font-black uppercase tracking-widest mt-1 opacity-70">{unit.bhk}</span>
@@ -299,8 +299,8 @@ AI Action: Automatically triggering tailored WhatsApp interactive brochure to co
                   </div>
                 </div>
 
-                {/* Kanban grid columns */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 overflow-x-auto pb-4">
+                 {/* Kanban grid columns */}
+                <div className="flex md:grid md:grid-cols-5 gap-4 overflow-x-auto pb-4 max-w-full no-scrollbar">
                   {(['leads', 'nurtured', 'visit', 'blocked', 'closed'] as const).map(stage => {
                     const stageLeads = leads.filter(l => l.stage === stage);
                     const stageLabels = {
@@ -312,7 +312,7 @@ AI Action: Automatically triggering tailored WhatsApp interactive brochure to co
                     };
 
                     return (
-                      <div key={stage} className="bg-beige-50/50 border border-beige-200 rounded-2xl p-3 flex flex-col gap-3 min-w-[200px]">
+                      <div key={stage} className="bg-beige-50/50 border border-beige-200 rounded-2xl p-3 flex flex-col gap-3 min-w-[240px] md:min-w-0 flex-shrink-0 flex-1">
                         <div className={`p-2 rounded-xl border text-[9px] font-black uppercase tracking-wider text-center ${stageLabels[stage].bg}`}>
                           {stageLabels[stage].name} ({stageLeads.length})
                         </div>
