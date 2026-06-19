@@ -16,6 +16,10 @@ import ContactPage from './components/ContactPage';
 import Logo from './components/Logo';
 import LandingPage from './components/LandingPage';
 import DemoPage from './components/DemoPage';
+import ServicesPage from './components/ServicesPage';
+import FeaturesPage from './components/FeaturesPage';
+import PrivacyPolicyPage from './components/PrivacyPolicyPage';
+import TermsPage from './components/TermsPage';
 import { getProperties, subscribeToProperties } from './services/propertyService';
 import { subscribeToAuthChanges, getCurrentUserDoc, logout as firebaseLogout } from './services/authService';
 import { runConnectionTest } from './services/testService';
@@ -25,7 +29,7 @@ import { logActivity } from './services/activityService';
 import { doc, getDoc, query, collection, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 
-type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING' | 'ABOUT' | 'CONTACT' | 'DEMO';
+type ViewState = 'MARKET' | 'DETAILS' | 'SELLERS' | 'AGENTS' | 'SHORTLIST' | 'PRICING' | 'ABOUT' | 'CONTACT' | 'DEMO' | 'FEATURES' | 'SERVICES' | 'PRIVACY' | 'TERMS';
 
 const ModernBuildingSilhouette = () => (
   <div className="absolute right-0 bottom-0 w-full md:w-1/2 h-full z-0 pointer-events-none opacity-[0.05] overflow-hidden">
@@ -661,8 +665,10 @@ const App: React.FC = () => {
 
           <div className="hidden md:flex items-center gap-1">
             <button onClick={() => { setView('MARKET'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Home</button>
-            <button onClick={() => setView('ABOUT')} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">About</button>
-            <button onClick={() => setView('CONTACT')} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Contact</button>
+            <button onClick={() => { setView('FEATURES'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Features</button>
+            <button onClick={() => { setView('SERVICES'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Services</button>
+            <button onClick={() => { setView('ABOUT'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">About Us</button>
+            <button onClick={() => { setView('CONTACT'); window.scrollTo(0,0); }} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-muted hover:text-navy transition-all">Contact Us</button>
             
             <button onClick={() => { setView('DEMO'); window.scrollTo(0,0); }} className="px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white bg-navy hover:bg-gold rounded-full transition-all ml-4 shadow-soft">Book Demo</button>
           </div>
@@ -683,8 +689,10 @@ const App: React.FC = () => {
       </nav>
 
       <div className="md:hidden flex items-center justify-around bg-white/80 backdrop-blur-md border-b border-beige-200 px-2 py-3 sticky top-14 z-[90] shadow-sm">
-         <button onClick={() => { setView('MARKET'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Home</button>
-         <button onClick={() => { setView('DEMO'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${view === 'DEMO' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Book Demo</button>
+         <button onClick={() => { setView('MARKET'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'MARKET' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Home</button>
+         <button onClick={() => { setView('FEATURES'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'FEATURES' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Features</button>
+         <button onClick={() => { setView('SERVICES'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'SERVICES' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Services</button>
+         <button onClick={() => { setView('DEMO'); window.scrollTo(0,0); }} className={`text-[9px] font-black uppercase tracking-widest px-3 py-2 rounded-xl transition-all ${view === 'DEMO' ? 'bg-navy text-white shadow-soft' : 'text-navy-muted'}`}>Book Demo</button>
       </div>
 
       <div className={`fixed inset-0 bg-navy/50 backdrop-blur-sm z-[200] transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsMobileMenuOpen(false)}>
@@ -700,14 +708,16 @@ const App: React.FC = () => {
               <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Explore</h3>
               <div className="flex flex-col gap-2">
                 <button onClick={() => { setIsMobileMenuOpen(false); setView('MARKET'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Home</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('FEATURES'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Features</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('SERVICES'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Services</button>
                 <button onClick={() => { setIsMobileMenuOpen(false); setView('DEMO'); window.scrollTo(0,0); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Book Demo</button>
               </div>
             </div>
             <div className="space-y-3">
               <h3 className="text-[10px] font-black uppercase tracking-widest text-navy-muted">Company</h3>
               <div className="flex flex-col gap-2">
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('ABOUT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">About</button>
-                <button onClick={() => { setIsMobileMenuOpen(false); setView('CONTACT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Contact</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('ABOUT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">About Us</button>
+                <button onClick={() => { setIsMobileMenuOpen(false); setView('CONTACT'); }} className="text-left text-xs font-bold text-navy hover:text-gold transition-colors">Contact Us</button>
               </div>
             </div>
           </div>
@@ -725,7 +735,10 @@ const App: React.FC = () => {
           <>
             {view === 'MARKET' && (
           <div className="duration-700">
-            <LandingPage onDemoClick={() => { setView('DEMO'); window.scrollTo(0,0); }} />
+            <LandingPage 
+              onDemoClick={() => { setView('DEMO'); window.scrollTo(0,0); }} 
+              onFeaturesClick={() => { setView('FEATURES'); window.scrollTo(0,0); }}
+            />
 
             {(filters.query || filters.category !== 'ALL' || filters.bhk !== 'ALL' || filters.propertyType) && (
               <div id="inventory-section" className="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
@@ -849,6 +862,18 @@ const App: React.FC = () => {
         {view === 'ABOUT' && <AboutPage />}
         {view === 'CONTACT' && <ContactPage />}
         {view === 'DEMO' && <DemoPage />}
+        {view === 'FEATURES' && (
+          <FeaturesPage onDemoClick={() => { setView('DEMO'); window.scrollTo(0,0); }} />
+        )}
+        {view === 'SERVICES' && (
+          <ServicesPage onDemoClick={() => { setView('DEMO'); window.scrollTo(0,0); }} />
+        )}
+        {view === 'PRIVACY' && (
+          <PrivacyPolicyPage onBackToHome={() => { setView('MARKET'); window.scrollTo(0,0); }} />
+        )}
+        {view === 'TERMS' && (
+          <TermsPage onBackToHome={() => { setView('MARKET'); window.scrollTo(0,0); }} />
+        )}
       </>
     )}
       </main>
@@ -870,30 +895,30 @@ const App: React.FC = () => {
             <div className="space-y-6">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Platform</h4>
               <ul className="space-y-4 text-[10px] font-black uppercase tracking-widest text-white/60">
-                <li className="hover:text-white transition-colors cursor-pointer">About Us</li>
-                <li className="hover:text-white transition-colors cursor-pointer">How it Works</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Partner Hub</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Careers</li>
+                <li onClick={() => { setView('ABOUT'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">About Us</li>
+                <li onClick={() => { setView('FEATURES'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Features</li>
+                <li onClick={() => { setView('SERVICES'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Services</li>
+                <li onClick={() => { setView('AGENTS'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Partner Hub</li>
               </ul>
             </div>
-
+            
             <div className="space-y-6">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Explore</h4>
               <ul className="space-y-4 text-[10px] font-black uppercase tracking-widest text-white/60">
-                <li className="hover:text-white transition-colors cursor-pointer">Hyderabad</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Bangalore</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Mumbai</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Pune</li>
+                <li onClick={() => { setFilters({ ...filters, query: 'Hyderabad' }); setView('MARKET'); }} className="hover:text-white transition-colors cursor-pointer">Hyderabad</li>
+                <li onClick={() => { setFilters({ ...filters, query: 'Bangalore' }); setView('MARKET'); }} className="hover:text-white transition-colors cursor-pointer">Bangalore</li>
+                <li onClick={() => { setFilters({ ...filters, query: 'Mumbai' }); setView('MARKET'); }} className="hover:text-white transition-colors cursor-pointer">Mumbai</li>
+                <li onClick={() => { setFilters({ ...filters, query: 'Pune' }); setView('MARKET'); }} className="hover:text-white transition-colors cursor-pointer">Pune</li>
               </ul>
             </div>
 
             <div className="space-y-6">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Legal</h4>
               <ul className="space-y-4 text-[10px] font-black uppercase tracking-widest text-white/60">
-                <li className="hover:text-white transition-colors cursor-pointer">Terms of Service</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Privacy Policy</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Cookie Protocol</li>
-                <li className="hover:text-white transition-colors cursor-pointer">Contact Support</li>
+                <li onClick={() => { setView('TERMS'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Terms of Service</li>
+                <li onClick={() => { setView('PRIVACY'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Privacy Policy</li>
+                <li onClick={() => { setView('PRIVACY'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Cookie Protocol</li>
+                <li onClick={() => { setView('CONTACT'); window.scrollTo(0,0); }} className="hover:text-white transition-colors cursor-pointer">Contact Support</li>
               </ul>
             </div>
           </div>
